@@ -32,8 +32,7 @@ export const
         port: 3306,
         username: 'root',
         password: '123456',
-        // database:'yangben',
-        database:'yangbendev2',
+        database:'test-es',
     },
         checkUrl:'http://localhost:5000/test',
         sysId:'281', //鉴权服务id

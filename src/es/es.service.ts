@@ -3,6 +3,7 @@ import { CreateEDto } from './dto/create-e.dto';
 import { UpdateEDto } from './dto/update-e.dto';
 import {ElasticsearchService} from "@nestjs/elasticsearch";
 import {YangbenDtoEs} from "./dto/yangben-es.dto";
+import {YangbenSearch} from "../dagl-dt/entities/dagl-dt.entity";
 
 @Injectable()
 export class EsService {
@@ -11,7 +12,92 @@ export class EsService {
       private readonly elasticsearchService: ElasticsearchService
   ) {}
 
-  //--------------------------------------------------------------------------------------
+    //--------添加dagl-dt------------------------------------------------------------
+    async addBulkYB_dt(dtos) {
+        const params = [];
+        for(let i = 0 ; i<dtos.length; i++){
+            const dto = dtos[i];
+            // if(i == 1){
+                const paramIndex = { index: {_index: 'dagl_dt', _type: '_doc', _id: dto.id}};
+                params.push(paramIndex);
+                const paramDate = {classifyId1:dto.classifyId1,classifyName1:dto.classifyName1,classifyId2:dto.classifyId2,
+                    classifyName2:dto.classifyName2,name:dto.name,objectId:dto.objectId,chuzhiId:dto.chuzhiId,objectName:dto.objectName,
+                    chuzhiName:dto.chuzhiName,yangbenContent:dto.yangbenContent,seqNo:dto.seqNo,chuzhiCnt:dto.chuzhiCnt};
+                params.push(paramDate)
+            // }
+        }
+
+        return this.elasticsearchService.bulk({
+            body:params
+        });
+    }
+
+    /**
+     * 多条件查询
+     * @param dto
+     */
+    async findManyEsDagl(dto:YangbenSearch){
+        const pageSize = 10;
+        const pageNumber = 1
+        const mustParams = [];//must查询条件
+
+        if(null != dto.classifyId1){ const param = {match:{classifyId1:dto.classifyId1}} ; mustParams.push(param)};
+
+        if(null != dto.classifyName1){const param = {match:{classifyName1:dto.classifyName1}} ; mustParams.push(param)};
+
+        if(null != dto.classifyId2){const param = {match:{classifyId2:dto.classifyId2}} ; mustParams.push(param)};
+
+        if(null != dto.classifyName2){const param = {match:{classifyName2:dto.classifyName2}} ; mustParams.push(param)};
+
+        if(null != dto.name){const param = {match:{name:dto.name}} ; mustParams.push(param)};
+
+        if(null != dto.objectId){const param = {match:{objectId:dto.objectId}} ; mustParams.push(param)};
+
+        if(null != dto.chuzhiId){const param = {match:{chuzhiId:dto.chuzhiId}} ; mustParams.push(param)};
+
+        if(null != dto.objectName){const param = {match:{objectName:dto.objectName}} ; mustParams.push(param)};
+
+        if(null != dto.chuzhiName){const param = {match:{chuzhiName:dto.chuzhiName}} ; mustParams.push(param)};
+
+        if(null != dto.yangbenContent){const param = {match:{yangbenContent:dto.yangbenContent}} ; mustParams.push(param)};
+
+        if(null != dto.seqNo){const param = {match:{seqNo:dto.seqNo}} ; mustParams.push(param)};
+
+        if(null != dto.chuzhiCnt){const param = {match:{chuzhiCnt:dto.chuzhiCnt}} ; mustParams.push(param)};
+
+        return this.elasticsearchService.search({
+            index: 'dagl_dt', type: '_doc', body: {
+                from: (pageNumber - 1) * pageSize,  // 从哪里开始
+                size: pageSize, // 查询条数
+                query: {
+                    bool: {
+                        // must:[
+                        //     // {match:{gwly:"岗位来源5"}},
+                        //     {match:{gwly:"岗位来源"}},
+                        //     // {match:{czlsh:"ssdsdd5"}},
+                        //     {match:{czlsh:"ssdsdd5"}},
+                        //     // {match:{czsd:"处置手段5"}},
+                        //     {match:{czsd:"处置"}},
+                        //     // {match:{gksj:""}},
+                        //     {match:{dxyb:"独享样本5"}},
+                        // ],
+                        // filter:{
+                        //     range:{
+                        //         czsj:{
+                        //             gte:"2020-05-04",
+                        //             lte:"2020-05-05"
+                        //         }
+                        //     }
+                        // }
+                        must:mustParams
+                    }
+                }
+            }
+        });
+    }
+
+
+  //-----------添加dagl---------------------------------------------------------------------------
 
   // 添加、修改、删除数据
   async bulkYB(params: any) {
@@ -37,7 +123,19 @@ export class EsService {
           dxyb: createEDto.dxyb,
           cjsj: createEDto.cjsj,
           gwly: createEDto.gwly
-        }
+        },
+          { index: { _index: 'dagl', _type: '_doc', _id: 0 } },
+          {
+              czlsh: createEDto.czlsh,
+              dxlx: createEDto.dxlx,
+              czsl: createEDto.czsl,
+              czsj: createEDto.czsj,
+              czsd: createEDto.czsd,
+              gksj: createEDto.gksj,
+              dxyb: createEDto.dxyb,
+              cjsj: createEDto.cjsj,
+              gwly: createEDto.gwly
+          },
       ]
     });
   }

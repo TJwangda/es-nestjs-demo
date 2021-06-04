@@ -91,6 +91,23 @@ export class EsService {
                         // }
                         must:mustParams
                     }
+                },
+                highlight: {
+                    fields: {
+
+                        classifyName1: {},
+                        classifyId1: {},
+                        classifyId2: {},
+                        classifyName2: {},
+                        name: {},
+                        objectId: {},
+                        chuzhiId: {},
+                        objectName: {},
+                        chuzhiName: {},
+                        yangbenContent: {},
+                        seqNo: {},
+                        chuzhiCnt: {}
+                    }
                 }
             }
         });
